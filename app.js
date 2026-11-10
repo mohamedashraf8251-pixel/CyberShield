@@ -468,7 +468,7 @@ function attachRootkitLab(){
 
 function fileIntegrityHTML(language){
   const ar=language==="ar";
-  return '<section class="res" id="integrityLab"><h2>'+ (ar?"فحص سلامة الملفات الحقيقي":"Real file integrity check") +'</h2>'+
+  return '<div class="res" id="integrityLab"><h2>'+ (ar?"فحص سلامة الملفات الحقيقي":"Real file integrity check") +'</h2>'+
     '<p>'+ (ar?"اختر ملفات من جهازك لحساب بصمة SHA-256 ومقارنتها ببصمات محفوظة على هذا المتصفح. لا يتم رفع الملفات إلى أي خادم.":"Select files on your device to calculate SHA-256 fingerprints and compare them with a baseline saved in this browser. Files are not uploaded.") +'</p>'+
     '<input id="integrityFiles" type="file" multiple style="display:block;max-width:100%;margin:14px 0" aria-label="'+(ar?"اختر الملفات":"Choose files")+'">'+
     '<div class="cta"><button class="btn primary" id="integrityScan">'+(ar?"فحص ومقارنة":"Scan and compare")+'</button><button class="btn" id="integritySave">'+(ar?"حفظ كبصمة مرجعية":"Save as baseline")+'</button><button class="btn" id="integrityClear">'+(ar?"مسح البصمات المحفوظة":"Clear saved baseline")+'</button></div>'+
