@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://mohamedashraf8251-pixel.github.io/CyberShield/sitemap.xml
