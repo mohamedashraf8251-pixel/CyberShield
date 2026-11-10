@@ -81,6 +81,12 @@ const TOOL_DATA = {
   }
 };
 
+  rootkitlab:{
+    phase:{ar:"التحليل والدفاع (Blue Team)",en:"Defensive Analysis (Blue Team)"},
+    ar:{name:"Rootkit Analysis Lab",d:"معمل تعليمي لتحليل مؤشرات Rootkits والتعرّف على أدوات الفحص الدفاعي، مع محاكاة آمنة وروابط لأدوات حقيقية.",features:["التعرّف على مؤشرات Rootkit المحتملة","فهم فحص الملفات والعمليات وسلامة الإقلاع","تقييم نتائج افتراضية وتصنيف مستوى الخطورة","التعرّف على أدوات فحص Linux وWindows"],legal:"الفحص الفعلي يجب أن يتم على جهازك أو جهاز لديك إذن بفحصه. صفحة الويب لا تستطيع فحص نظام التشغيل أو كشف Rootkit بنفسها؛ استخدم الأدوات محليًا واتبع توثيقها."},
+    en:{name:"Rootkit Analysis Lab",d:"An educational lab for recognizing rootkit indicators and learning defensive scanning tools, with a safe simulation and links to real tools.",features:["Recognize possible rootkit indicators","Understand file, process, and boot-integrity checks","Classify fictional findings by severity","Explore defensive tools for Linux and Windows"],legal:"Run real scans only on devices you own or are authorized to inspect. A web page cannot inspect your operating system or detect a rootkit by itself; use trusted tools locally and follow their documentation."},
+    link:"https://learn.microsoft.com/en-us/defender-endpoint/microsoft-defender-offline"
+  },
 const COURSE_ORDER = ["intro","network","web","forensics","pentest","crypto"];
 const COURSE_DATA = {
   intro:{
@@ -257,7 +263,8 @@ const T = {
         {cat:"أدوات المسح والاستطلاع (Scanning)",ids:["nmap","shodan"]},
         {cat:"اختبار الاختراق (Pentesting)",ids:["metasploit","burp"]},
         {cat:"التحليل الجنائي الرقمي (Forensics)",ids:["autopsy","wireshark"]},
-        {cat:"أمن التطبيقات (Application Security)",ids:["zap","sqlmap"]}
+        {cat:"أمن التطبيقات (Application Security)",ids:["zap","sqlmap"]},
+        {cat:"تحليل البرمجيات الخبيثة وRootkits",ids:["rootkitlab"]}
       ]
     },
     about:{
@@ -316,7 +323,8 @@ const T = {
         {cat:"Scanning & Recon",ids:["nmap","shodan"]},
         {cat:"Pentesting",ids:["metasploit","burp"]},
         {cat:"Digital Forensics",ids:["autopsy","wireshark"]},
-        {cat:"Application Security",ids:["zap","sqlmap"]}
+        {cat:"Application Security",ids:["zap","sqlmap"]},
+        {cat:"Malware & Rootkit Analysis",ids:["rootkitlab"]}
       ]
     },
     about:{
@@ -364,6 +372,36 @@ function attachToolCardListeners(){
   document.querySelectorAll('[data-tool]').forEach(el=>{
     el.onclick = ()=>{ location.hash = "#tool-"+el.getAttribute('data-tool'); };
   });
+}
+
+function rootkitLabHTML(language){
+  const ar=language==="ar";
+  return '<h2 class="section-h">' + (ar?"محاكاة تحليل آمنة":"Safe analysis simulation") + '</h2>' +
+    '<p class="lead">' + (ar?"النتائج افتراضية للتدريب فقط. هذه الصفحة لا تفحص جهازك ولا تتصل بنظامك.":"Fictional training findings only. This page does not scan your device or access your system.") + '</p>' +
+    '<div class="res"><h3>' + (ar?"فحص تدريبي":"Training scan") + '</h3><p>' + (ar?"اضغط لعرض نتائج افتراضية والتدرب على تقييمها.":"Review fictional findings and practice evaluating them.") + '</p><button class="btn primary" id="rootkitRun">' + (ar?"تشغيل المحاكاة":"Run simulation") + '</button><div id="rootkitResults" aria-live="polite"></div></div>' +
+    '<h2 class="section-h">' + (ar?"أدوات فحص حقيقية":"Real defensive tools") + '</h2><div class="grid">' +
+    '<div class="card"><h3>Microsoft Defender Offline</h3><p>' + (ar?"فحص من بيئة استرداد Windows للمساعدة في اكتشاف البرمجيات الخبيثة المستعصية.":"Windows recovery-environment scan for persistent malware.") + '</p><a class="link-ext" href="https://learn.microsoft.com/en-us/defender-endpoint/microsoft-defender-offline" target="_blank" rel="noopener noreferrer">Official documentation ↗</a></div>' +
+    '<div class="card"><h3>chkrootkit</h3><p>' + (ar?"أداة Linux معروفة لفحص مؤشرات Rootkits.":"A known Linux utility for checking rootkit indicators.") + '</p><a class="link-ext" href="https://www.chkrootkit.org/" target="_blank" rel="noopener noreferrer">Official site ↗</a></div>' +
+    '<div class="card"><h3>rkhunter</h3><p>' + (ar?"أداة تدقيق لأنظمة Unix/Linux تبحث عن مؤشرات مشبوهة.":"A Unix/Linux auditing tool that checks for suspicious indicators.") + '</p><a class="link-ext" href="https://rkhunter.sourceforge.net/" target="_blank" rel="noopener noreferrer">Official site ↗</a></div>' +
+    '<div class="card"><h3>Microsoft Sysinternals Autoruns</h3><p>' + (ar?"يراجع عناصر التشغيل التلقائي في Windows، لكنه ليس ماسح Rootkit شاملًا.":"Reviews Windows auto-start entries; it is not a complete rootkit scanner.") + '</p><a class="link-ext" href="https://learn.microsoft.com/en-us/sysinternals/downloads/autoruns" target="_blank" rel="noopener noreferrer">Official documentation ↗</a></div></div>' +
+    '<div class="notice warn">' + (ar?"لا تحذف ملفات أو توقف خدمات اعتمادًا على اسم غير مألوف فقط. نتائج المحاكاة ليست تشخيصًا.":"Do not delete files or stop services based only on an unfamiliar name. Simulation results are not a diagnosis.") + '</div>';
+}
+function attachRootkitLab(){
+  const button=document.getElementById("rootkitRun");
+  if(!button)return;
+  button.onclick=()=>{
+    const ar=isArabic();
+    const findings=ar?[
+      ["ملف نظام تغيّر توقيعه الرقمي","مرتفع","تحقق من المصدر وقارن التوقيع بنسخة موثوقة."],
+      ["عملية غير مألوفة تعمل من مجلد مؤقت","متوسط","الاسم وحده لا يثبت الإصابة؛ راجع المسار والناشر والسلوك."],
+      ["عنصر تشغيل تلقائي غير معروف","متوسط","تحقق من الناشر والغرض قبل اتخاذ إجراء."]
+    ]:[
+      ["Unexpected system-file signature change","High","Verify its origin and compare it with a trusted baseline."],
+      ["Unfamiliar process running from a temporary folder","Medium","A name alone proves nothing; review path, publisher, and behavior."],
+      ["Unknown auto-start entry","Medium","Verify publisher and purpose before taking action."]
+    ];
+    document.getElementById("rootkitResults").innerHTML = '<div class="meta">' + findings.map((f,i)=>'<div class="chip"><b>'+(i+1)+". "+f[0]+'</b><span class="badge">'+f[1]+'</span><p>'+f[2]+'</p></div>').join("") + '</div><p class="quiz-feedback">' + (ar?"هذه نتائج افتراضية ولا تؤكد وجود Rootkit.":"These are fictional findings and do not confirm a rootkit.") + '</p>';
+  };
 }
 
 function renderPage(){
@@ -425,7 +463,9 @@ function renderPage(){
       <p class="lead">${td.legal}</p>
       <h2 class="section-h">${d.linkLabel}</h2>
       <p><a class="link-ext" href="${tool.link}" target="_blank" rel="noopener noreferrer">${tool.link}</a></p>
+      ${currentTool==="rootkitlab" ? rootkitLabHTML(lang) : ""}
     `;
+    if(currentTool==="rootkitlab") attachRootkitLab();
     document.getElementById("toolBack").onclick = ()=>{ location.hash="#tools"; };
     renderNav();
     return;
