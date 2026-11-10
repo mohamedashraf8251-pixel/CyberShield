@@ -389,9 +389,14 @@ function rootkitLabHTML(language){
 }
 function attachRootkitLab(){
   const button=document.getElementById("rootkitRun");
-  if(!button)return;
+  const host=document.getElementById("rootkitResults");
+  if(!button||!host)return;
   button.onclick=()=>{
+    if(button.disabled)return;
     const ar=lang==="ar";
+    const stages=ar
+      ? ["تهيئة بيئة الفحص التجريبية...","مراجعة مؤشرات سلامة الملفات...","تحليل العمليات وعناصر بدء التشغيل...","تجميع النتائج وتقييمها..."]
+      : ["Preparing the simulated scan...","Reviewing file-integrity indicators...","Analyzing processes and startup entries...","Compiling and assessing findings..."];
     const findings=ar?[
       ["ملف نظام تغيّر توقيعه الرقمي","مرتفع","تحقق من المصدر وقارن التوقيع بنسخة موثوقة."],
       ["عملية غير مألوفة تعمل من مجلد مؤقت","متوسط","الاسم وحده لا يثبت الإصابة؛ راجع المسار والناشر والسلوك."],
@@ -401,7 +406,62 @@ function attachRootkitLab(){
       ["Unfamiliar process running from a temporary folder","Medium","A name alone proves nothing; review path, publisher, and behavior."],
       ["Unknown auto-start entry","Medium","Verify publisher and purpose before taking action."]
     ];
-    document.getElementById("rootkitResults").innerHTML = '<div class="meta">' + findings.map((f,i)=>'<div class="chip"><b>'+(i+1)+". "+f[0]+'</b><span class="badge">'+f[1]+'</span><p>'+f[2]+'</p></div>').join("") + '</div><p class="quiz-feedback">' + (ar?"هذه نتائج افتراضية ولا تؤكد وجود Rootkit.":"These are fictional findings and do not confirm a rootkit.") + '</p>';
+    button.disabled=true;
+    button.textContent=ar?"الفحص جارٍ...":"Scanning...";
+    host.replaceChildren();
+    const status=document.createElement("p");
+    status.setAttribute("role","status");
+    status.textContent=stages[0];
+    const track=document.createElement("div");
+    track.setAttribute("role","progressbar");
+    track.setAttribute("aria-valuemin","0");
+    track.setAttribute("aria-valuemax","100");
+    track.setAttribute("aria-valuenow","0");
+    track.style.cssText="height:12px;background:var(--border,#263244);border-radius:20px;overflow:hidden;margin:14px 0";
+    const fill=document.createElement("div");
+    fill.style.cssText="height:100%;width:0%;background:var(--accent,#38bdf8);transition:width .35s ease;border-radius:20px";
+    track.appendChild(fill);
+    const percent=document.createElement("p");
+    percent.textContent="0%";
+    host.append(status,track,percent);
+    let step=0;
+    const timer=window.setInterval(()=>{
+      step++;
+      const value=Math.round(step/stages.length*100);
+      status.textContent=stages[Math.min(step,stages.length)-1];
+      fill.style.width=value+"%";
+      track.setAttribute("aria-valuenow",String(value));
+      percent.textContent=value+"%";
+      if(step<stages.length)return;
+      window.clearInterval(timer);
+      const heading=document.createElement("h3");
+      heading.textContent=ar?"نتائج الفحص التدريبي":"Training scan results";
+      host.appendChild(heading);
+      const list=document.createElement("div");
+      list.className="meta";
+      findings.forEach((finding,index)=>{
+        const card=document.createElement("div");
+        card.className="chip";
+        const title=document.createElement("b");
+        title.textContent=(index+1)+". "+finding[0];
+        const severity=document.createElement("span");
+        severity.className="badge";
+        severity.textContent=finding[1];
+        const detail=document.createElement("p");
+        detail.textContent=finding[2];
+        card.append(title,severity,detail);
+        list.appendChild(card);
+      });
+      host.appendChild(list);
+      const note=document.createElement("p");
+      note.className="quiz-feedback";
+      note.textContent=ar
+        ?"اكتمل الفحص التجريبي. النتائج افتراضية ولا تؤكد وجود Rootkit أو إصابة فعلية."
+        :"Simulation complete. These fictional findings do not confirm a rootkit or a real infection.";
+      host.appendChild(note);
+      button.disabled=false;
+      button.textContent=ar?"إعادة تشغيل المحاكاة":"Run simulation again";
+    },900);
   };
 }
 
