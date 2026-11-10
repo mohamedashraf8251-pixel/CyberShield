@@ -465,6 +465,100 @@ function attachRootkitLab(){
   };
 }
 
+
+function fileIntegrityHTML(language){
+  const ar=language==="ar";
+  return '<section class="res" id="integrityLab"><h2>'+ (ar?"فحص سلامة الملفات الحقيقي":"Real file integrity check") +'</h2>'+
+    '<p>'+ (ar?"اختر ملفات من جهازك لحساب بصمة SHA-256 ومقارنتها ببصمات محفوظة على هذا المتصفح. لا يتم رفع الملفات إلى أي خادم.":"Select files on your device to calculate SHA-256 fingerprints and compare them with a baseline saved in this browser. Files are not uploaded.") +'</p>'+
+    '<input id="integrityFiles" type="file" multiple style="display:block;max-width:100%;margin:14px 0" aria-label="'+(ar?"اختر الملفات":"Choose files")+'">'+
+    '<div class="cta"><button class="btn primary" id="integrityScan">'+(ar?"فحص ومقارنة":"Scan and compare")+'</button><button class="btn" id="integritySave">'+(ar?"حفظ كبصمة مرجعية":"Save as baseline")+'</button><button class="btn" id="integrityClear">'+(ar?"مسح البصمات المحفوظة":"Clear saved baseline")+'</button></div>'+
+    '<p id="integrityStatus" class="quiz-feedback" role="status" aria-live="polite"></p><div id="integrityResults"></div>'+
+    '<div class="notice">'+(ar?"مهم: هذه الأداة تفحص الملفات التي تختارها فقط، ولا تكشف Rootkits أو تفحص ملفات النظام تلقائيًا. البصمات محفوظة محليًا ويمكن حذفها من بيانات المتصفح.":"Important: this checks only files you select. It does not detect rootkits or automatically inspect system files. Baselines are stored locally and can be removed with browser data.")+'</div></section>';
+}
+async function integrityHash(file){
+  if(!window.crypto || !crypto.subtle) throw new Error("Web Crypto unavailable");
+  const bytes=await file.arrayBuffer();
+  const digest=await crypto.subtle.digest("SHA-256",bytes);
+  return Array.from(new Uint8Array(digest),b=>b.toString(16).padStart(2,"0")).join("");
+}
+function attachFileIntegrityLab(){
+  const input=document.getElementById("integrityFiles");
+  const scan=document.getElementById("integrityScan");
+  const save=document.getElementById("integritySave");
+  const clear=document.getElementById("integrityClear");
+  const status=document.getElementById("integrityStatus");
+  const results=document.getElementById("integrityResults");
+  if(!input||!scan||!save||!clear)return;
+  const ar=lang==="ar";
+  const key="cybershield-file-integrity-baseline-v1";
+  const readBaseline=()=>{
+    try{return JSON.parse(localStorage.getItem(key)||"{}");}
+    catch(_){return {};}
+  };
+  const selected=()=>Array.from(input.files||[]);
+  const label=(file)=>file.webkitRelativePath||file.name;
+  const showRows=(rows)=>{
+    results.replaceChildren();
+    const list=document.createElement("div");list.className="meta";
+    rows.forEach(row=>{
+      const card=document.createElement("div");card.className="chip";
+      const title=document.createElement("b");title.textContent=row.name;
+      const state=document.createElement("span");state.className="badge";state.textContent=row.state;
+      const hash=document.createElement("p");hash.textContent="SHA-256: "+row.hash;
+      card.append(title,state,hash);list.appendChild(card);
+    });
+    results.appendChild(list);
+  };
+  const lock=(busy)=>{
+    scan.disabled=busy;save.disabled=busy;clear.disabled=busy;
+    scan.textContent=busy?(ar?"جارٍ الفحص...":"Scanning..."):(ar?"فحص ومقارنة":"Scan and compare");
+    save.textContent=busy?(ar?"يرجى الانتظار...":"Please wait..."):(ar?"حفظ كبصمة مرجعية":"Save as baseline");
+  };
+  const hashSelected=async()=>{
+    const files=selected();
+    if(!files.length)throw new Error(ar?"اختر ملفًا واحدًا على الأقل أولًا.":"Choose at least one file first.");
+    const rows=[];
+    for(const file of files){
+      const hash=await integrityHash(file);
+      rows.push({name:label(file),hash,size:file.size,lastModified:file.lastModified});
+    }
+    return rows;
+  };
+  scan.onclick=async()=>{
+    try{
+      lock(true);status.textContent=ar?"يتم حساب بصمات الملفات محليًا...":"Calculating file hashes locally...";
+      const rows=await hashSelected();const baseline=readBaseline();
+      const output=rows.map(row=>{
+        const old=baseline[row.name];
+        let state;
+        if(!old)state=ar?"لا توجد بصمة سابقة":"No previous baseline";
+        else if(old.hash===row.hash)state=ar?"سليم: لم يتغير":"Unchanged";
+        else state=ar?"تحذير: الملف تغيّر":"Changed";
+        return {...row,state};
+      });
+      showRows(output);
+      const changed=output.filter(x=>x.state===(ar?"تحذير: الملف تغيّر":"Changed")).length;
+      status.textContent=ar?"اكتمل الفحص. الملفات: "+rows.length+"، الملفات المتغيرة: "+changed+".":"Scan complete. Files: "+rows.length+", changed: "+changed+".";
+    }catch(e){status.textContent=e.message|| (ar?"تعذر فحص الملفات.":"Could not scan files.");}
+    finally{lock(false);}
+  };
+  save.onclick=async()=>{
+    try{
+      lock(true);status.textContent=ar?"يتم إنشاء البصمات المرجعية...":"Creating baseline fingerprints...";
+      const rows=await hashSelected();const baseline=readBaseline();
+      rows.forEach(row=>{baseline[row.name]={hash:row.hash,size:row.size,lastModified:row.lastModified};});
+      localStorage.setItem(key,JSON.stringify(baseline));
+      showRows(rows.map(row=>({...row,state:ar?"تم حفظ البصمة":"Baseline saved"})));
+      status.textContent=ar?"تم حفظ بصمات "+rows.length+" ملفًا على هذا المتصفح فقط.":"Saved fingerprints for "+rows.length+" file(s) in this browser only.";
+    }catch(e){status.textContent=e.message|| (ar?"تعذر حفظ البصمات.":"Could not save baseline.");}
+    finally{lock(false);}
+  };
+  clear.onclick=()=>{
+    localStorage.removeItem(key);results.replaceChildren();
+    status.textContent=ar?"تم مسح البصمات المرجعية المحفوظة.":"Saved baseline cleared.";
+  };
+}
+
 function renderPage(){
   const d = T[lang];
   document.documentElement.lang = lang;
@@ -525,8 +619,9 @@ function renderPage(){
       <h2 class="section-h">${d.linkLabel}</h2>
       <p><a class="link-ext" href="${tool.link}" target="_blank" rel="noopener noreferrer">${tool.link}</a></p>
       ${currentTool==="rootkitlab" ? rootkitLabHTML(lang) : ""}
+      ${currentTool==="rootkitlab" ? fileIntegrityHTML(lang) : ""}
     `;
-    if(currentTool==="rootkitlab") attachRootkitLab();
+    if(currentTool==="rootkitlab"){ attachRootkitLab(); attachFileIntegrityLab(); }
     document.getElementById("toolBack").onclick = ()=>{ location.hash="#tools"; };
     renderNav();
     return;
