@@ -22,12 +22,7 @@
   --bg:#0b0f14; --surface:#121824; --surface2:#1a2230; --text:#e7edf5; --muted:#8ea0b5;
   --accent:#3ddc97; --accent2:#4f8dfd; --border:#223042; --warn:#f5a524; color-scheme: dark;
 }
-@media (prefers-color-scheme: light){
-  :root:not([data-theme="dark"]){
-    --bg:#f5f7fa; --surface:#ffffff; --surface2:#eef2f7; --text:#121824; --muted:#51607a;
-    --accent:#0e9f6e; --accent2:#2563eb; --border:#dbe3ee; --warn:#b45309; color-scheme: light;
-  }
-}
+:root[data-theme="light"]{ --bg:#f5f7fa; --surface:#ffffff; --surface2:#eef2f7; --text:#121824; --muted:#51607a; --accent:#0e9f6e; --accent2:#2563eb; --border:#dbe3ee; --warn:#b45309; color-scheme: light;}
 :root[data-theme="dark"]{ --bg:#0b0f14; --surface:#121824; --surface2:#1a2230; --text:#e7edf5; --muted:#8ea0b5; --accent:#3ddc97; --accent2:#4f8dfd; --border:#223042; --warn:#f5a524; color-scheme: dark;}
 *{box-sizing:border-box}
 html{scroll-padding-top:env(safe-area-inset-top,0px)}
