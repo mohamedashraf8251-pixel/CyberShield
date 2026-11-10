@@ -78,15 +78,16 @@ const TOOL_DATA = {
       features:["Discovering potential entry points for SQL Injection","Understanding the exploitation mechanics methodically","Supporting multiple database types","Widely used in CTF environments for safe, hands-on learning"],
       legal:"Using it on any application you don't own or lack explicit written permission for is a cybercrime; restrict use to closed, licensed test environments." },
     link:"https://sqlmap.org/"
-  }
-};
-
+  },
   rootkitlab:{
     phase:{ar:"التحليل والدفاع (Blue Team)",en:"Defensive Analysis (Blue Team)"},
     ar:{name:"Rootkit Analysis Lab",d:"معمل تعليمي لتحليل مؤشرات Rootkits والتعرّف على أدوات الفحص الدفاعي، مع محاكاة آمنة وروابط لأدوات حقيقية.",features:["التعرّف على مؤشرات Rootkit المحتملة","فهم فحص الملفات والعمليات وسلامة الإقلاع","تقييم نتائج افتراضية وتصنيف مستوى الخطورة","التعرّف على أدوات فحص Linux وWindows"],legal:"الفحص الفعلي يجب أن يتم على جهازك أو جهاز لديك إذن بفحصه. صفحة الويب لا تستطيع فحص نظام التشغيل أو كشف Rootkit بنفسها؛ استخدم الأدوات محليًا واتبع توثيقها."},
     en:{name:"Rootkit Analysis Lab",d:"An educational lab for recognizing rootkit indicators and learning defensive scanning tools, with a safe simulation and links to real tools.",features:["Recognize possible rootkit indicators","Understand file, process, and boot-integrity checks","Classify fictional findings by severity","Explore defensive tools for Linux and Windows"],legal:"Run real scans only on devices you own or are authorized to inspect. A web page cannot inspect your operating system or detect a rootkit by itself; use trusted tools locally and follow their documentation."},
     link:"https://learn.microsoft.com/en-us/defender-endpoint/microsoft-defender-offline"
   },
+};
+
+
 const COURSE_ORDER = ["intro","network","web","forensics","pentest","crypto"];
 const COURSE_DATA = {
   intro:{
@@ -390,7 +391,7 @@ function attachRootkitLab(){
   const button=document.getElementById("rootkitRun");
   if(!button)return;
   button.onclick=()=>{
-    const ar=isArabic();
+    const ar=lang==="ar";
     const findings=ar?[
       ["ملف نظام تغيّر توقيعه الرقمي","مرتفع","تحقق من المصدر وقارن التوقيع بنسخة موثوقة."],
       ["عملية غير مألوفة تعمل من مجلد مؤقت","متوسط","الاسم وحده لا يثبت الإصابة؛ راجع المسار والناشر والسلوك."],
