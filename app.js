@@ -679,15 +679,27 @@ routeFromHash();
   document.addEventListener("keydown", e=>{ if(e.key === "Escape") closeQuiz(); });
 
   function setTheme(theme){
-    document.documentElement.dataset.theme = theme;
-    try { localStorage.setItem("cybershield-theme", theme); } catch(e){}
-    themeBtn.textContent = theme === "dark" ? "☀️" : "🌙";
-    themeBtn.title = theme === "dark" ? (isArabic()?"الوضع النهاري":"Light mode") : (isArabic()?"الوضع الليلي":"Dark mode");
+    const nextTheme = theme === "light" ? "light" : "dark";
+    document.documentElement.setAttribute("data-theme", nextTheme);
+    document.documentElement.style.colorScheme = nextTheme;
+    try { localStorage.setItem("cybershield-theme", nextTheme); } catch(e){}
+    if (themeBtn) {
+      themeBtn.textContent = nextTheme === "dark" ? "☀️" : "🌙";
+      themeBtn.setAttribute("aria-label", nextTheme === "dark" ? "Switch to light mode" : "Switch to dark mode");
+      themeBtn.title = nextTheme === "dark" ? (isArabic() ? "التبديل للوضع الفاتح" : "Switch to light mode") : (isArabic() ? "التبديل للوضع الداكن" : "Switch to dark mode");
+    }
   }
   let savedTheme = "dark";
   try { savedTheme = localStorage.getItem("cybershield-theme") || "dark"; } catch(e){}
   setTheme(savedTheme);
-  themeBtn.addEventListener("click", ()=>setTheme(document.documentElement.dataset.theme === "dark" ? "light" : "dark"));
+  if (themeBtn) {
+    themeBtn.onclick = (event) => {
+      event.preventDefault();
+      event.stopPropagation();
+      const currentTheme = document.documentElement.getAttribute("data-theme");
+      setTheme(currentTheme === "dark" ? "light" : "dark");
+    };
+  }
 
   // Event delegation keeps search working after the page re-renders.
   document.addEventListener("input", e=>{
