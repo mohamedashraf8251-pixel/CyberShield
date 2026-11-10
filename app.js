@@ -384,7 +384,7 @@ function renderPage(){
     const cd = c[lang];
     const resBox = (r, cls, label) => `<div class="res ${cls}">
         <h3>${r[lang].name}</h3><p>${r[lang].note}</p>
-        <a class="btn primary" href="${r.link}" target="_blank" rel="noopener">${d.openBtn}</a>
+        <a class="btn primary" href="${r.link}" target="_blank" rel="noopener noreferrer">${d.openBtn}</a>
         <span class="url">${r.link}</span></div>`;
     sec.innerHTML = `
       <button class="back" id="courseBack">${d.backCourses}</button>
@@ -424,7 +424,7 @@ function renderPage(){
       <h2 class="section-h">${d.legalLabel}</h2>
       <p class="lead">${td.legal}</p>
       <h2 class="section-h">${d.linkLabel}</h2>
-      <p><a class="link-ext" href="${tool.link}" target="_blank" rel="noopener">${tool.link}</a></p>
+      <p><a class="link-ext" href="${tool.link}" target="_blank" rel="noopener noreferrer">${tool.link}</a></p>
     `;
     document.getElementById("toolBack").onclick = ()=>{ location.hash="#tools"; };
     renderNav();
