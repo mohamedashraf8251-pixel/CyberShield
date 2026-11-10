@@ -473,7 +473,7 @@ function fileIntegrityHTML(language){
     '<input id="integrityFiles" type="file" multiple style="display:block;max-width:100%;margin:14px 0" aria-label="'+(ar?"اختر الملفات":"Choose files")+'">'+
     '<div class="cta"><button class="btn primary" id="integrityScan">'+(ar?"فحص ومقارنة":"Scan and compare")+'</button><button class="btn" id="integritySave">'+(ar?"حفظ كبصمة مرجعية":"Save as baseline")+'</button><button class="btn" id="integrityClear">'+(ar?"مسح البصمات المحفوظة":"Clear saved baseline")+'</button></div>'+
     '<p id="integrityStatus" class="quiz-feedback" role="status" aria-live="polite"></p><div id="integrityResults"></div>'+
-    '<div class="notice">'+(ar?"مهم: هذه الأداة تفحص الملفات التي تختارها فقط، ولا تكشف Rootkits أو تفحص ملفات النظام تلقائيًا. البصمات محفوظة محليًا ويمكن حذفها من بيانات المتصفح.":"Important: this checks only files you select. It does not detect rootkits or automatically inspect system files. Baselines are stored locally and can be removed with browser data.")+'</div></section>';
+    '<div class="notice">'+(ar?"مهم: هذه الأداة تفحص الملفات التي تختارها فقط، ولا تكشف Rootkits أو تفحص ملفات النظام تلقائيًا. البصمات محفوظة محليًا ويمكن حذفها من بيانات المتصفح.":"Important: this checks only files you select. It does not detect rootkits or automatically inspect system files. Baselines are stored locally and can be removed with browser data.")+'</div></div>';
 }
 async function integrityHash(file){
   if(!window.crypto || !crypto.subtle) throw new Error("Web Crypto unavailable");
